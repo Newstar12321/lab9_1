@@ -42,7 +42,7 @@ int rand_(int t)
 	}
 }
 
-struct Data
+struct MyDate
 {
 	int year;
 	int mon;
@@ -50,51 +50,29 @@ struct Data
 
 	void in()
 	{
-		cin >> this->day
-			>> this->mon
-			>> this->year;
+		cin >> this->day >> this->mon >> this->year;
+		//validate
 	}
 
-	int sr_god(Data& now)
+	//bool operator>=(MyDate& other);  // dat >= dat2
+	//MyDate& operator+(int days);     // dat + 32
+
+	/**
+	 * @brief Сравнить даты
+	 * @param now
+	 * @return Дата ещё не наступила
+	*/
+	bool cmp(MyDate& now)
 	{
 		int year = this->year - now.year;
 		int mon = this->mon - now.mon;
 		int day = this->day - now.day;
-		if (!year)
-		{
-			if (!mon)
-			{
-				if (day > 0)
-				{
-					return 0;
-
-				}
-				return 1;
-			}
-			if (mon > 0)
-			{
-				return 0;
-			}
-			return 1;
-		}
-		if (year > 0)
-		{
-			return 0;
-
-		}
-		return 1;
+		return year >= 0 || mon >= 0 || day >= 0;
 	}
 
-	void out(bool n)
+	void print()
 	{
-		if (!n)
-		{
-			cout << "Введите дату изготовления в формате: дд мм гггг\t";
-			return;
-		}
-		cout << this->day << '.'
-			<< this->mon << '.'
-			<< this->year;
+		cout << this->day << '.' << this->mon << '.' << this->year;
 	}
 
 };
@@ -103,10 +81,10 @@ struct Drug
 {
 	int kol_p;
 	int weight;
-	int sr;
 	string name;
-	Data date;
-	Data l_date;
+	MyDate date;
+	// срок годности в днях
+	int sr;
 
 	void in()
 	{
@@ -115,36 +93,17 @@ struct Drug
 		this->kol_p = rand_(3);
 		this->weight = rand_(4);
 		this->sr = rand_(2);
-
-		bool n = 0;
-		bool& n_ = n;
-		date.out(n_);
-		date.in();
-		l_date = date;
-		l_date.year += sr;
+		this->date.in();
 	}
 
-	void out(bool& i)
+	void print()
 	{
-		bool n = 1;
-		bool& n_ = n;
-		if (i) {
-			cout << this->name << ' '
-				<< this->kol_p << ' '
-				<< this->weight << ' ';
-			this->date.out(n_);
-			cout << ' ' << this->sr << endl;
-			cout << "Дата истечения срока годности: ";
-			this->l_date.out(n_);
-			cout << "\n";
-			return;
-		}
 		cout << "Name: " << this->name
 			<< "\nKol: " << this->kol_p
 			<< "\nWeight: " << this->weight
 			<< "\nDate: ";
-		this->date.out(n_);
-		cout << "\nSrok godnosty: " << this->sr << " years";
+		this->date.print();
+		cout << "\nSrok godnosty: " << this->sr << " days";
 		cout << "\n___\n";
 	}
 };
@@ -155,7 +114,6 @@ int main()
 	size_t n;
 	cout << "Введите количество лекарств: ";
 	cin >> n;
-
 	if (!n)
 	{
 		cerr << "Ошибка! Недопустимое значение\n";
@@ -164,23 +122,24 @@ int main()
 
 	Drug* arr = new Drug[n];
 	for (size_t i = 0; i < n; i++) {
-		bool n = 0;
-		bool& n_ = n;
 		arr[i].in();
-		arr[i].out(n_);
+		arr[i].print();
 	}
 
-	Data y_date;
+	MyDate now;
 	cout << "Введите сегодняшнее число в формате дд мм гггг: ";
-	y_date.in();
-	Data& y = y_date;
+	now.in();
+
 	int k = 0;
-	bool out_i = 1;
-	bool& out_ii = out_i;
 	for (size_t i = 0; i < n; i++) {
-		if (arr[i].l_date.sr_god(y))
+		// дата истечения
+		MyDate l_date = arr[i].date;
+		l_date.day += arr[i].sr; // (!)
+		if (l_date.cmp(now))
 		{
-			arr[i].out(out_ii);
+			arr[i].print();
+			cout << "Дата истечения срока годности: ";
+			l_date.print();
 			k++;
 		}
 	}
