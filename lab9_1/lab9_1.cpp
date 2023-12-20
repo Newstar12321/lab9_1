@@ -37,6 +37,21 @@ int rand_(int t)
 		uniform_int_distribution<> w(100, 1000);
 		return w(gen);
 	}
+	case 5:
+	{
+		uniform_int_distribution<> d(1, 31);
+		return d(gen);
+	}
+	case 6:
+	{
+		uniform_int_distribution<> m(1, 12);
+		return m(gen);
+	}
+	case 7:
+	{
+		uniform_int_distribution<> g(2000, 2050);
+		return g(gen);
+	}
 	default:
 		return 0;
 	}
@@ -44,14 +59,22 @@ int rand_(int t)
 
 struct MyDate
 {
-	int year;
-	int mon;
-	int day;
+	size_t year;
+	size_t mon;
+	size_t day;
 
-	void in()
+	bool in()
 	{
 		cin >> this->day >> this->mon >> this->year;
 		//validate
+		if (this->day && this->day <= 31 &&
+			this->mon && this->mon <= 12 &&
+			this->year >= 1000 &&
+			this->year <= 9999)
+		{
+			return 0;
+		}
+		return 1;
 	}
 
 	//bool operator>=(MyDate& other);  // dat >= dat2
@@ -67,14 +90,35 @@ struct MyDate
 		int year = this->year - now.year;
 		int mon = this->mon - now.mon;
 		int day = this->day - now.day;
-		return year >= 0 || mon >= 0 || day >= 0;
+		if (!year)
+		{
+			if (!mon)
+			{
+				if (day > 0)
+				{
+					return 0;
+
+				}
+				return 1;
+			}
+			if (mon > 0)
+			{
+				return 0;
+			}
+			return 1;
+		}
+		if (year > 0)
+		{
+			return 0;
+
+		}
+		return 1;
 	}
 
 	void print()
 	{
 		cout << this->day << '.' << this->mon << '.' << this->year;
 	}
-
 };
 
 struct Drug
@@ -93,18 +137,20 @@ struct Drug
 		this->kol_p = rand_(3);
 		this->weight = rand_(4);
 		this->sr = rand_(2);
-		this->date.in();
+		this->date.day = rand_(5);
+		this->date.mon = rand_(6);
+		this->date.year = rand_(7);
 	}
 
 	void print()
 	{
+		cout << "___\n";
 		cout << "Name: " << this->name
 			<< "\nKol: " << this->kol_p
 			<< "\nWeight: " << this->weight
 			<< "\nDate: ";
 		this->date.print();
-		cout << "\nSrok godnosty: " << this->sr << " days";
-		cout << "\n___\n";
+		cout << "\nSrok godnosty: " << this->sr << " days\n\n";
 	}
 };
 
@@ -128,7 +174,11 @@ int main()
 
 	MyDate now;
 	cout << "Введите сегодняшнее число в формате дд мм гггг: ";
-	now.in();
+	if (now.in())
+	{
+		cerr << "Ошибка!";
+		return 1;
+	}
 
 	int k = 0;
 	for (size_t i = 0; i < n; i++) {
@@ -140,6 +190,7 @@ int main()
 			arr[i].print();
 			cout << "Дата истечения срока годности: ";
 			l_date.print();
+			cout << endl;
 			k++;
 		}
 	}
